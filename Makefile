@@ -8,8 +8,8 @@ COMMON  += mingw_mmap.o
 endif
 
 CC	=  gcc
-CFLAGS	=  -g -O2 -Wall -W
-LDLIBS  =  -lz
+CFLAGS	=  -g -O2 -Wall -W 
+LDLIBS  =  -lz -lm
 
 # Darwin's MacPorts Default Path
 ifeq ($(shell test -e /opt/local/include/gmp.h; echo $$?),0)
