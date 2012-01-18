@@ -17,12 +17,12 @@ void analizeSFO(u8 *pkg, u32 sfo_offset, u32 sfo_size){
 		printf("[SFO Offset]  0x%08x\n", sfo_offset);
 		printf("[SFO Size  ]  0x%08x\n", sfo_size);
 		printf("[SFO Version] 0x%08x\n", (unsigned int)le32(pkg+sfo_offset+0x4));
-		printf("[SFO N]	      %u Value(s)\n", sfo_n_params);
+		printf("[SFO N]	      %u Value(s)\n", sfo_n_params-0x1);
 		printf("[SFO Values]  0x%08x\n", sfo_vals);
 		printf("[SFO Params]  0x%08x\n", sfo_param);
 	}
 	printf("[ SFO ]\n");
-	for(i=0x0;i<sfo_n_params;i+=0x1){
+	for(i=0x0;i<sfo_n_params-0x1;i+=0x1){
 		char value[0x20];
 		char param[0x200];
 		sfo_val_size		= le8 (pkg+(sfo_offset+0x24+(i*0x10)))-le8(pkg+(sfo_offset+0x14+(i*0x10)));
@@ -34,7 +34,7 @@ void analizeSFO(u8 *pkg, u32 sfo_offset, u32 sfo_size){
 		for(k=0;k<(unsigned int)(u32)sfo_val_size;k++)
 			value[k] = be8(pkg+(sfo_val_ptr+k));
 
-		printf("[ %3i ] %20s",i, value);
+		printf("[ %3i ] %20s",i+1, value);
 		if(sfo_param_size==0x4){
 			if(sfo_type!=UTF8){
 				param32 = le32(pkg+sfo_param_ptr);
@@ -86,5 +86,4 @@ void analizeSFO(u8 *pkg, u32 sfo_offset, u32 sfo_size){
 			}
 		}else{}
 	}
-	printf("[Content]\n");
 }

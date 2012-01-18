@@ -53,7 +53,7 @@ void readPKG(void){
 	}
 	
 	analizeSFO(pkg,sfo_off,sfo_size);
-
+	printf("[Content]\n");
 }
 
 int main(int argc, char *argv[]){
