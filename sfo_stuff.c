@@ -10,7 +10,7 @@ void analizeSFO(u8 *pkg, u32 sfo_offset, u32 sfo_size){
 	u32 sfo_val_ptr,sfo_val_size,sfo_param_ptr,sfo_param_size;
 	u64 param32;
 	unsigned int i,k;
-
+	printf("\n");
 
 	if(dbg()==1){
 		printf("[SFO HDR]     0x%08x\n", (unsigned int)le32(pkg+sfo_offset));
@@ -26,7 +26,7 @@ void analizeSFO(u8 *pkg, u32 sfo_offset, u32 sfo_size){
 		char value[0x20];
 		char param[0x200];
 		sfo_val_size		= le8 (pkg+(sfo_offset+0x24+(i*0x10)))-le8(pkg+(sfo_offset+0x14+(i*0x10)));
-		sfo_val_ptr		= (sfo_offset+sfo_vals+ le16(pkg+(sfo_offset+0x14+(i*0x10))));
+		sfo_val_ptr		= sfo_offset+sfo_vals+le16(pkg+(sfo_offset+0x14+(i*0x10)));
 		sfo_param_size		= le32(pkg+(sfo_offset+0x1c+(i*0x10)));
 		sfo_param_ptr		= le32(pkg+(sfo_offset+0x20+(i*0x10)))+sfo_offset+sfo_param;
 		sfo_type 		= le16(pkg+(sfo_offset+0x16+(i*0x10)));
