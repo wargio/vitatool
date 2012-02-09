@@ -9,6 +9,7 @@ Authors
 -------
 
 Fail0verflow team
+
 deroad
 
 CHANGELOG
@@ -16,7 +17,10 @@ CHANGELOG
 
 
 initial release
+
 *pkg_reader (unfinished and bugged)
 
+
 1.00
+
 *pkg_reader fixed and fully working pupunpack!!
