@@ -5,8 +5,8 @@ VITA TOOLS
 
 pkg_reader is unfinished
 
-Author
-______
+Authors
+-------
 
 Fail0verflow team
 deroad
