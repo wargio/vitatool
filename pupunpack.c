@@ -39,6 +39,11 @@ static struct id2name_tbl t_names[] = {
 	{0x30d, "package_data13.pkg"},
 	{0x30e, "package_data14.pkg"},
 	{0x30f, "package_data15.pkg"},
+	{0x310, "package_data16.pkg"},
+	{0x311, "package_data17.pkg"},
+	{0x312, "package_data18.pkg"},
+	{0x313, "package_data19.pkg"},
+	{0x314, "package_data20.pkg"},
 	{0x400, "package_scewm.wm"},
 	{0x401, "package_sceas.as"},
 	{0, NULL}
