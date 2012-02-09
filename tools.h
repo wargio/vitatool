@@ -27,6 +27,7 @@ void *mmap_file(const char *path);
 void memcpy_to_file(const char *fname, u8 *ptr, u64 size);
 const char *id2name(u32 id, struct id2name_tbl *t, const char *unk);
 void fail(const char *fmt, ...) __attribute__((noreturn));
+void dmsg(const char *a, ...);
 void decompress(u8 *in, u64 in_len, u8 *out, u64 out_len);
 void get_rand(u8 *bfr, u32 size);
 

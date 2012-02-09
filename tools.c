@@ -81,6 +81,15 @@ void fail(const char *a, ...)
 	exit(1);
 }
 
+void dmsg(const char *a, ...){
+	char msg[1024];
+	va_list va;
+
+	va_start(va, a);
+	vsnprintf(msg, sizeof msg, a, va);
+	if(DBG!=0) fprintf(stderr, "%s", msg);
+}
+
 void decompress(u8 *in, u64 in_len, u8 *out, u64 out_len)
 {
 	z_stream s;

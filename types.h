@@ -133,7 +133,7 @@ static inline u16 le16(u8 *p)
 	u16 a;
 
 	a  = p[1] << 8;
-	a |= p[0];
+	a |= p[2];
 
 	return a;
 }
@@ -179,27 +179,6 @@ static inline void wbe64(u8 *p, u64 v)
 	wbe32(p + 4, v);
 	v >>= 32;
 	wbe32(p, v);
-}
-
-static inline void wle16(u8 *p, u16 v)
-{
-	p[1] = v >>  8;
-	p[2] = v;
-}
-
-static inline void wle32(u8 *p, u32 v)
-{
-	p[3] = v >> 24;
-	p[2] = v >> 16;
-	p[1] = v >>  8;
-	p[0] = v;
-}
-
-static inline void wle64(u8 *p, u64 v)
-{
-	wle32(p + 4, v);
-	v >>= 32;
-	wle32(p, v);
 }
 
 #endif

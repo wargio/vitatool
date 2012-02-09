@@ -5,9 +5,18 @@ VITA TOOLS
 
 pkg_reader is unfinished
 
+Author
+______
+
+Fail0verflow team
+deroad
+
 CHANGELOG
 =========
 
 
 initial release
 *pkg_reader (unfinished and bugged)
+
+1.00
+*pkg_reader fixed and fully working pupunpack!!

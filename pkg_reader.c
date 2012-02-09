@@ -88,10 +88,9 @@ void readPKG(void){
 	u32 sfo_off	= be32(pkg+pkg_info_offset+0x30+(pkg_info_size*8));
 	u32 sfo_size	= be32(pkg+pkg_info_offset+0x34+(pkg_info_size*8));
 
-	if(dbg()==1){
-		printf("[PKG HDR ]    0x%08x \n", hdr);
-		printf("[Info offset] 0x%08x \n", pkg_info_offset);
-	}
+	dmsg("[PKG HDR ]    0x%08x \n", hdr);
+	dmsg("[Info offset] 0x%08x \n", pkg_info_offset);
+
 	if(pkg_type>=0x80000000)
 		printf("[Retail]      0x%x\n",(unsigned int)pkg_type);
 	else
@@ -101,9 +100,7 @@ void readPKG(void){
 	printf("[PKG  Size]   %u Bytes\n",(unsigned int)pkg_size);
 	printf("[Content ID]  0x%s\n",contentid);
 	printf("[Data Size]   %u Bytes\n",(unsigned int)data_size);
-	if(dbg()==1){
-		printf("[Data Offset] 0x%x\n",(unsigned int)data_offset);
-	}
+	dmsg("[Data Offset] 0x%x\n",(unsigned int)data_offset);
 	
 	printf("[Digest]      0x");
 	for(i=0x0;i<0x10;i++)
@@ -140,4 +137,5 @@ int main(int argc, char *argv[]){
 
 	return 0;
 }
+
 
