@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include "tools.h"
 #include "types.h"
+#include "little_endian.h"
 
 static u8 *pup = NULL;
 static u32 file_count;

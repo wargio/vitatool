@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include "tools.h"
 #include "types.h"
-
+#include "little_endian.h"
 
 #define SFO_0x4		0x4
 #define SFO_0x8		0x8

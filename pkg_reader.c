@@ -12,6 +12,12 @@
 #include "types.h"
 #include "sfo_stuff.h"
 
+#ifdef WIN32
+#define MKDIR(x,y) mkdir(x)
+#else
+#define MKDIR(x,y) mkdir(x,y)
+#endif
+
 static u8 *pkg = NULL;
 
 u32 sc_header = 0x7f504b47;
@@ -39,23 +45,83 @@ padding 	0x1C 	u32 	zero
 
 */
 
+
+static void decrypt_retail_pkg(void){
+	u8 key[0x10];
+	u8 iv[0x10];
+
+	if (be16(pkg + 0x06) != 2)
+		fail("invalid pkg type: %x", be16(pkg + 0x06));
+
+	if (key_get_simple("gpkg-key", key, 0x10) < 0)
+		fail("failed to load the package key.");
+
+	memcpy(iv, pkg + 0x70, 0x10);
+	aes128ctr(key, iv, pkg + data_offset, data_size, pkg + data_offset);
+}
+
+static void decrypt_debug_pkg(void){
+	u8 key[0x40];
+	u8 bfr[0x1c];
+	u64 i;
+
+	memset(key, 0, sizeof key);
+	memcpy(key, pkg + 0x60, 8);
+	memcpy(key + 0x08, pkg + 0x60, 8);
+	memcpy(key + 0x10, pkg + 0x60 + 0x08, 8);
+	memcpy(key + 0x18, pkg + 0x60 + 0x08, 8);
+
+	sha1(key, sizeof key, bfr);
+
+	for (i = 0; i < data_size; i++) {
+		if (i != 0 && (i % 16) == 0) {
+			wle64(key + 0x38, le64(key + 0x38) + 1);	
+			sha1(key, sizeof key, bfr);
+		}
+		pkg[data_offset + i] ^= bfr[i & 0xf];
+	}
+}
+
+
+
 void analizeDATA(void){
 	printf("\n[ DATA ]\n");
 
-/*	u32 i;
-	u32 filename_offset;
-	u32 filename_size;
-	u64 data_offset;
-	u64 data_size;
+	u64 i;
+	u64 n_files;
+	u32 fname_len;
+	u32 fname_off;
+	u64 file_offset;
 	u32 flags;
-	u32 padding;
-	
+	char fname[256];
+	u8 *tmp;
+	u64 size;
 	for(i=0;i<item_count;i++){
 
+		tmp = pkg + data_offset + i*0x20;
 
+		fname_off = le32(tmp) + data_offset;
+		fname_len = le32(tmp + 0x04);
+		file_offset = le64(tmp + 0x08) + data_offset;
+		size = le64(tmp + 0x10);
+		flags = le32(tmp + 0x18);
+
+		if (fname_len >= sizeof fname)
+			fail("filename too long: %s", pkg + fname_off);
+
+		memset(fname, 0, sizeof fname);
+		strncpy(fname, (char *)(pkg + fname_off), fname_len);
+
+		flags &= 0xff;
+		if (flags == 4)
+			MKDIR(fname, 0777);
+		else if (flags == 1 || flags == 3)
+			memcpy_to_file(fname, pkg + file_offset, size);
+		else
+			fail("unknown flags: %08x", flags);
 
 	}
-*/
+
 }
 
 void readPKG(void){
@@ -111,7 +177,16 @@ void readPKG(void){
 		printf("%x",k_licensee[i]);	
 	printf("\n");
 	analizeSFO(pkg,sfo_off,sfo_size);
+
+
+	if (pkg_type>=0x80000000)
+		decrypt_retail_pkg();
+	else
+		decrypt_debug_pkg();
+
 	analizeDATA();
+
+
 }
 
 int main(int argc, char *argv[]){
