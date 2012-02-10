@@ -76,7 +76,7 @@ void Unpup(){
 		security_1[i] = be64(pup+0x30+i);
 */
 
-	dmsg("[HDR]          0x%08x%08x\n",HDR,HDR>>32);
+	dmsg("[HDR]          0x%08x%08x\n",HDR>>32,HDR);
 	dmsg("[PKG][VERSION] 0x%08x\n",pkg_version);
 	dmsg("[IMG][VERSION] 0x%08x\n",img_version);
 	printf("[N Files]      %u\n",file_count);
