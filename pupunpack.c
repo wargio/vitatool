@@ -14,6 +14,8 @@
 static u8 *pup = NULL;
 static u32 file_count;
 
+const u64 PSV_HDR = 0x5343455546000001;
+
 static int read_only = 0;
 
 static struct id2name_tbl t_names[] = {
@@ -58,6 +60,10 @@ void Unpup(){
 		printf("Read Only Mode!\n");
 	printf("Reading...\n");
 	u64 HDR = be64(pup);
+
+	if(HDR!=PSV_HDR)
+		fail("\nERROR! Not a PlayStation Vita Update File (%08x%08x)",HDR>>32,HDR);
+
 	u32 pkg_version = le32(pup+0x08);
 	u32 img_version = le32(pup+0x10);
 	file_count = le32(pup+0x18);
@@ -104,14 +110,20 @@ int main(int argc, char *argv[]){
 
 	} else if(argc == 3) {
 		if (strcmp(argv[1], "-d") != 0)
-			if(strcmp(argv[1], "-rd") !=0)
-				fail("invalid option: %s", argv[1]);
+			if(strcmp(argv[1], "-r") !=0)
+				if(strcmp(argv[1], "-rd") !=0)
+					fail("invalid option: %s", argv[1]);
 		
 		if(strcmp(argv[1], "-d")==0)
 			set_dbg_flag();
 
-		if(strcmp(argv[1], "-rd")==0)
+		if(strcmp(argv[1], "-r")==0)
 			read_only=1;
+
+		if(strcmp(argv[1], "-rd")==0){
+			read_only=1;
+			set_dbg_flag();
+		}
 
 		printf( "PUP Unpacker\n");
 		pup = mmap_file(argv[2]);
@@ -119,7 +131,11 @@ int main(int argc, char *argv[]){
 		Unpup();
 
 	}else {
-		fail("usage: %s PSP2UPDAT.PUP\n	-d	| show more informations\n	-rd	| read only mode",argv[0]);
+		fail("usage: %s PSP2UPDAT.PUP\n"
+			"	-d	| debug messages\n"
+			"	-r	| read only mode\n"
+			"	-rd	| read only + debug messages"
+			,argv[0]);
 	}
 
 

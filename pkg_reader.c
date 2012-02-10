@@ -42,7 +42,7 @@ padding 	0x1C 	u32 	zero
 void analizeDATA(void){
 	printf("\n[ DATA ]\n");
 
-	int i;
+/*	u32 i;
 	u32 filename_offset;
 	u32 filename_size;
 	u64 data_offset;
@@ -55,6 +55,7 @@ void analizeDATA(void){
 
 
 	}
+*/
 }
 
 void readPKG(void){
