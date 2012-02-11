@@ -50,7 +50,7 @@ static void decrypt_retail_pkg(void){
 	u8 key[0x10];
 	u8 iv[0x10];
 
-	if (be16(pkg + 0x06) != 2)
+	if (be16(pkg + 0x06) != 1)
 		fail("invalid pkg type: %x", be16(pkg + 0x06));
 
 	if (key_get_simple("gpkg-key", key, 0x10) < 0)
@@ -159,14 +159,14 @@ void readPKG(void){
 	dmsg("[Info offset] 0x%08x \n", pkg_info_offset);
 
 	if(pkg_type>=0x80000000)
-		printf("[Retail]      0x%x\n",(unsigned int)pkg_type);
+		dmsg("[Retail]      0x%x\n",(unsigned int)pkg_type);
 	else
-		printf("[Not Retail]  0x%x\n",(unsigned int)pkg_type);
+		dmsg("[Not Retail]  0x%x\n",(unsigned int)pkg_type);
 
 
 	printf("[PKG  Size]   %u Bytes\n",(unsigned int)pkg_size);
 	printf("[Content ID]  0x%s\n",contentid);
-	printf("[Data Size]   %u Bytes\n",(unsigned int)data_size);
+	dmsg("[Data Size]   %u Bytes\n",(unsigned int)data_size);
 	dmsg("[Data Offset] 0x%x\n",(unsigned int)data_offset);
 	
 	printf("[Digest]      0x");

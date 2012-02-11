@@ -12,6 +12,12 @@
 #include "types.h"
 #include "little_endian.h"
 
+#ifdef WIN32
+#define MKDIR(x,y) mkdir(x)
+#else
+#define MKDIR(x,y) mkdir(x,y)
+#endif
+
 static u8 *pup = NULL;
 static u32 file_count;
 
@@ -54,8 +60,21 @@ static struct id2name_tbl t_names[] = {
 
 
 
-void Unpup(){
+void Unpup(const char* folder){
 	u32 i;
+	char folder_2[200];
+	if(read_only!=1){
+		for(i=0;;i++){
+			sprintf(folder_2,"%s_%u",folder,i);
+			MKDIR(folder_2, 0777);
+			if (chdir(folder_2) != 0){
+				
+			}else{
+				break;
+			}
+		}
+	}
+
 	const char *file_name;
 	if(read_only!=0)
 		printf("Read Only Mode!\n");
@@ -107,7 +126,7 @@ int main(int argc, char *argv[]){
 	if (argc == 2) {
 		pup = mmap_file(argv[1]);
 		printf( "PUP Unpacker\n");
-		Unpup();
+		Unpup(argv[1]);
 
 	} else if(argc == 3) {
 		if (strcmp(argv[1], "-d") != 0)
@@ -129,7 +148,7 @@ int main(int argc, char *argv[]){
 		printf( "PUP Unpacker\n");
 		pup = mmap_file(argv[2]);
 		dmsg("[PUP File] %s\n",argv[2]);
-		Unpup();
+		Unpup(argv[1]);
 
 	}else {
 		fail("usage: %s PSP2UPDAT.PUP\n"

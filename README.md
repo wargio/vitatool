@@ -24,3 +24,7 @@ initial release
 1.00
 
 *pkg_reader fixed and fully working pupunpack!!
+
+1.01
+
+*pupunpack has been updated to unpack the PUP inside a folder called: NAME_UPDATE.PUP_0
