@@ -29,7 +29,7 @@ static struct id2name_tbl t_names[] = {
 	{0x100, "version.txt"},
 	{0x101, "license.xml"},
 	{0x200, "psp2swu.self"},
-	{0x204, "exec_fil.self"},
+	{0x204, "exec_file.self"},
 	{0x301, "package_data01.pkg"},
 	{0x302, "package_data02.pkg"},
 	{0x303, "package_data03.pkg"},
@@ -55,7 +55,16 @@ static struct id2name_tbl t_names[] = {
 	{0, NULL}
 };
 
-
+void Write(const char *file, u32 offset, u32 size){
+	FILE *fp;
+	fp = fopen(file, "wb");
+	u32 i;
+	for(i=0;i<size;i++){
+		fseek(fp,i, SEEK_SET);
+		fwrite(pup+offset+i, 1, 1, fp);
+	}
+	fclose(fp);
+}
 
 void Unpup(const char* folder){
 	u32 i;
@@ -86,20 +95,14 @@ void Unpup(const char* folder){
 	file_count = le32(pup+0x18);
 	u32 hdr_lenght = le32(pup+0x20);
 	u32 pkg_lenght = le32(pup+0x28);
-/*
-	//this is useless for now..
-	u8 security_1[0x50];
-	for(i=0;i<0x50;i+=0x1)
-		security_1[i] = be64(pup+0x30+i);
-*/
 
-	dmsg("[HDR]          0x%08x%08x\n",HDR>>32,HDR);
-	dmsg("[PKG][VERSION] 0x%08x\n",pkg_version);
-	dmsg("[IMG][VERSION] 0x%08x\n",img_version);
-	printf("[N Files]      %u\n",file_count);
-	dmsg("[HDR][Lenght]  0x%08x\n",hdr_lenght);
-	dmsg("[PKG][Lenght]  0x%08x\n",pkg_lenght);
-	dmsg("[TableLenght]  0x%08x\n",0x80+(0x20*file_count));
+	dmsg("HDR          0x%08x%08x\n",HDR>>32,HDR);
+	dmsg("PKG  VERSION 0x%08x\n",pkg_version);
+	dmsg("IMG  VERSION 0x%08x\n",img_version);
+      printf("N of Files   %u\n",file_count);
+	dmsg("HDR   Lenght 0x%08x\n",hdr_lenght);
+	dmsg("PKG   Lenght 0x%08x\n",pkg_lenght);
+	dmsg("Table Lenght 0x%08x\n",0x80+(0x20*file_count));
 	u32 entry,offset,size;
 	for(i=0;i<file_count;i+=0x1){
 		entry  = le32(pup+0x80+0x20*i);
@@ -109,12 +112,15 @@ void Unpup(const char* folder){
 		file_name = id2name(entry, t_names, NULL);
 		if(file_name==NULL)
 			fail("unknown entry id: 0x%08x | Offset: 0x%08x ",entry,offset);
-		dmsg("Offset: %08x  ",offset);
+	//	dmsg("Offset: %08x  ",offset);
 		printf("Found: %20s | size: %10u Bytes\n",file_name,size);
 		if(read_only!=1)
 			memcpy_to_file(file_name, pup + offset, size);
 	}
-
+	if(read_only!=1){
+		dmsg("Writing security_1..");
+		Write("security_1",0x30,0x50);
+	}
 	printf("Done!\n");
 }
 
@@ -144,7 +150,7 @@ int main(int argc, char *argv[]){
 
 		printf( "PUP Unpacker\n");
 		pup = mmap_file(argv[2]);
-		dmsg("[PUP File] %s\n",argv[2]);
+		dmsg("PUP File: %s\n",argv[2]);
 		Unpup(argv[1]);
 
 	}else {

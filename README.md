@@ -1,7 +1,7 @@
 VITA TOOLS
 ==========
 
-###Based on f0f tools and modified to be used with the vita.
+###Based on fail0verflow tools and modified to be used with the vita.
 
 Authors
 -------
@@ -23,3 +23,5 @@ CHANGELOG
 	    *initial version of unpkg. for now it is NOT able to decrypt pkg. it just extract the main parts.
 	    *deleted some id on the pupunpack
 	    *pkg_reader is still unfinished
+	*1.03
+	    *added security_1
