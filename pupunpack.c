@@ -151,7 +151,7 @@ int main(int argc, char *argv[]){
 		printf( "PUP Unpacker\n");
 		pup = mmap_file(argv[2]);
 		dmsg("PUP File: %s\n",argv[2]);
-		Unpup(argv[1]);
+		Unpup(argv[2]);
 
 	}else {
 		fail("usage: %s PSP2UPDAT.PUP\n"
