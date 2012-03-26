@@ -51,7 +51,7 @@ static void decrypt_retail_pkg(void){
 	u8 iv[0x10];
 
 	if (be16(pkg + 0x06) != 1)
-		fail("invalid pkg type: %x", be16(pkg + 0x06));
+		fail("pkg type: %x\nReminder. THIS TOOL IS NOT ABLE TO DECRYPT ANY PKG (for now)", be16(pkg + 0x06));
 
 	if (key_get_simple("gpkg-key", key, 0x10) < 0)
 		fail("failed to load the package key.");
@@ -88,7 +88,7 @@ void analizeDATA(void){
 	printf("\n[ DATA ]\n");
 
 	u64 i;
-	u64 n_files;
+//	u64 n_files;
 	u32 fname_len;
 	u32 fname_off;
 	u64 file_offset;
