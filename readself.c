@@ -17,6 +17,22 @@ static u8 *self = NULL;
 
 const u32 HDR = 0x53434500;
 
+void app_info(u64 offset){
+	u64 authid    = le64(self+offset);       /* auth id     */
+	u32 vendor_id = le32(self+offset+0x8);   /* vendor id   */
+	u32 self_type = le32(self+offset+0xC);   /* app type    */
+	u64 version   = le64(self+offset+0x10);  /* app version */
+	u64 padding   = le64(self+offset+0x18);  /* UNKNOWN     */
+
+	printf("--- APP INFO ---\n");	
+	printf("Authotiry ID            0x%08x%08x\n",authid,authid>>32);
+	printf("Vendor ID               0x%08x\n",vendor_id);
+	printf("SELF Type               0x%08x\n",self_type);
+	printf("Version                 0x%08x%08x\n",version,version>>32);
+	printf("Padding                 0x%08x%08x\n",padding,padding>>32);
+	
+}
+
 void readself(){
 	printf("Reading...\n");
 
@@ -66,6 +82,7 @@ void readself(){
 	printf("Control Info Size       0x%08x%08x (%u Bytes)\n",controlinfo_size,controlinfo_size>>32,controlinfo_size);
 	printf("Padding                 0x%08x%08x\n",padding,padding>>32);
 	
+	app_info(appinfo_offset);
 
 
 	printf("Done\n");
