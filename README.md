@@ -24,4 +24,6 @@ CHANGELOG
 	    *deleted some id on the pupunpack
 	    *pkg_reader is still unfinished
 	*1.03
-	    *added security_1
+	    *added security_1 to pupunpack
+	*1.04
+	    *added readself. it show information about the Playstation Vita Signed Executable and Linkable Format.
