@@ -27,3 +27,6 @@ CHANGELOG
 	    *added security_1 to pupunpack
 	*1.04
 	    *added readself. it show information about the Playstation Vita Signed Executable and Linkable Format.
+	*1.05
+	    *Updated readself. now shows more infos about selfs.
+	    *Updated pupunpack. corrected some ID stuff (a self 0x200 is sprx, same for 0x204. it is a self).

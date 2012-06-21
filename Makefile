@@ -24,8 +24,6 @@ all: $(TOOLS)
 $(TOOLS): %: %.o $(COMMON) $(DEPS)
 	$(CC) $(CFLAGS) -o $@ $< $(COMMON) $(LDLIBS) 
 
-scekrit: LDLIBS += -lgmp
-
 $(OBJS): %.o: %.c $(DEPS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 

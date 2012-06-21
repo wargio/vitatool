@@ -21,15 +21,15 @@
 static u8 *pup = NULL;
 static u32 file_count;
 
-const u64 PSV_HDR = 0x5343455546000001;
+const uint64_t PSV_HDR = 0x5343455546000001;
 
 static int read_only = 0;
 
 static struct id2name_tbl t_names[] = {
 	{0x100, "version.txt"},
 	{0x101, "license.xml"},
-	{0x200, "psp2swu.self"},
-	{0x204, "exec_file.self"},
+	{0x200, "psp2swu.sprx"},
+	{0x204, "psp2swu.self"},
 	{0x301, "package_data01.pkg"},
 	{0x302, "package_data02.pkg"},
 	{0x303, "package_data03.pkg"},
