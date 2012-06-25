@@ -30,3 +30,5 @@ CHANGELOG
 	*1.05
 	    *Updated readself. now shows more infos about selfs.
 	    *Updated pupunpack. corrected some ID stuff (a self 0x200 is sprx, same for 0x204. it is a self).
+	*1.05b
+	    *Updated readself. again more infos about selfs.

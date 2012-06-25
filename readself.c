@@ -11,31 +11,166 @@
 #include "tools.h"
 #include "types.h"
 #include "little_endian.h"
+#include "readself.h"
 
 static u8 *self = NULL;
 
 const u32 HDR = 0x53434500;
 
+void control_information(u32 offset){
+	uint32_t type    = le32(self+offset);    // 4== ; 6==;7==
+	offset+=sizeof(uint32_t);
+	uint32_t size    = le32(self+offset);
+	offset+=sizeof(uint32_t);
+	uint64_t unknown = le64(self+offset); // 0;1
+	offset+=sizeof(uint64_t);
+
+	printf("--- CONTROL INFORMATION ---\n");
+	printf("Type                    0x%08x\n",type);
+	printf("Size                    0x%08x\n",size);
+	printf("Unknown                 0x%08x%08x\n",(u32)unknown,(u32)(unknown>>32));
+
+}
+
+void sce_version(u32 offset){
+	uint32_t unknown1 = le32(self+offset);
+	offset+=sizeof(uint32_t);
+	uint32_t unknown2 = le32(self+offset);
+	offset+=sizeof(uint32_t);
+	uint32_t unknown3 = le32(self+offset);
+	offset+=sizeof(uint32_t);
+	uint32_t unknown4 = le32(self+offset);
+	offset+=sizeof(uint32_t);
+
+	printf("--- SELF SCE VERSION ---\n");
+	printf("Unknown_1               0x%08x\n",unknown1);
+	printf("Unknown_2               0x%08x\n",unknown2);
+	printf("Unknown_3               0x%08x\n",unknown3);
+	printf("Unknown_4               0x%08x\n",unknown4);
+
+}
+
+void program_hdr(u32 offset){
+	uint32_t p_type    = le32(self+offset);		/* type of segment           */
+	offset+=sizeof(uint32_t);
+	uint32_t p_flags   = le32(self+offset);		/* segment attributes        */
+	offset+=sizeof(uint32_t);
+	uint32_t p_offset  = le32(self+offset);		/* offset in file            */
+	offset+=sizeof(uint32_t);
+	uint32_t p_vaddr   = le32(self+offset);		/* virtual address in memory */
+	offset+=sizeof(uint32_t);
+	uint32_t p_paddr   = le32(self+offset);		/* reserved                  */
+	offset+=sizeof(uint32_t);
+	uint32_t p_filesz  = le32(self+offset);		/* size of segment in file   */
+	offset+=sizeof(uint32_t);
+	uint32_t p_memsz   = le32(self+offset);		/* size of segment in memory */
+	offset+=sizeof(uint32_t);
+	uint32_t p_align   = le32(self+offset);		/* alignment of segment      */
+	offset+=sizeof(uint32_t);
+
+	const char* p_type_char = prg_type(p_type);
+	const char* p_flags_char = prg_flags(p_flags);
+
+	printf("--- SELF PROGRAM INFO ---\n");
+	printf("Type                    0x%08x [%s]\n",p_type,p_type_char);
+	printf("Flags                   0x%08x [%s]\n",p_flags,p_flags_char);
+	printf("Offset                  0x%08x\n",p_offset);
+	printf("Virtual Address         0x%08x\n",p_vaddr);
+	printf("Reserved Adderess       0x%08x\n",p_paddr);
+	printf("Real Size               0x%08x (%u Bytes)\n",p_filesz,p_filesz);
+	printf("Size in Memory          0x%08x (%u Bytes)\n",p_memsz,p_memsz);
+	printf("Alignment               0x%08x (%u)\n",p_align,p_align);
+}
+
+void section_hdr(u32 offset){
+	uint32_t sh_name      = le32(self+offset);	/* section name */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_type      = le32(self+offset);	/* section type */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_flags     = le32(self+offset);	/* section attributes */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_addr      = le32(self+offset);	/* virtual address in memory */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_offset    = le32(self+offset);	/* offset in file */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_size      = le32(self+offset);	/* size of section */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_link      = le32(self+offset);	/* link to other section */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_info      = le32(self+offset);	/* miscellaneous information */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_addralign = le32(self+offset);	/* address alignment boundary */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_entsize   = le32(self+offset);	/* size of entries, if section has table */
+	offset+=sizeof(uint32_t);
+
+	printf("--- SELF PROGRAM INFO ---\n");
+	printf("Name                    0x%08x\n",sh_name);
+	printf("Type                    0x%08x\n",sh_type);
+	printf("Flags                   0x%08x\n",sh_flags);
+	printf("Virtual Address         0x%08x\n",sh_addr);
+	printf("Offset                  0x%08x (%u Bytes)\n",sh_offset,sh_offset);
+	printf("Size                    0x%08x\n",sh_size);
+	printf("Link to other section   0x%08x\n",sh_link);
+	printf("Info                    0x%08x\n",sh_info);
+	printf("Address Alignment       0x%08x\n",sh_addralign);
+	printf("Size Entries            0x%08x (%u Bytes)\n",sh_entsize,sh_entsize);
+}
+
 void elf(u32 offset){
+	uint8_t e_ident[16];
+	for(int i=0;i<0x10;i++)
+		e_ident[i] = be8(self+offset+i);
+
 	uint16_t e_type       = le16(self+offset+0x10);			/* object file type */
-	uint16_t e_machine    = le16(self+offset+0x12);			/* machine type */
-	uint32_t e_version    = le32(self+offset+0x14);			/* object file version */
-	uint64_t e_entry      = le64(self+offset+0x18);			/* entry point address */
-	uint32_t e_phoff      = le32(self+offset+0x24);			/* program header offset */
-	uint32_t e_shoff      = le32(self+offset+0x28);			/* section header offset */
-	uint16_t e_flags      = le16(self+offset+0x2c);			/* processor-specific flags */
-	uint32_t e_ehsize     = le16(self+offset+0x2e);			/* ELF header size */
-	uint16_t e_phentsize  = le16(self+offset+0x30);			/* size of program header entry */
-	uint16_t e_phnum      = le16(self+offset+0x34);			/* number of program header entries */
-	uint16_t e_shentsize  = le16(self+offset+0x38);			/* size of section header entry */
-	uint16_t e_shnum      = le16(self+offset+0x2c);			/* number of section header entries */
-	uint16_t e_shstrndx   = le16(self+offset+0x2e);			/* section name string table index */
+	offset+=0x10+sizeof(uint16_t);
+
+	uint16_t e_machine    = le16(self+offset);			/* machine type */
+	offset+=sizeof(uint16_t);
+
+	uint32_t e_version    = le32(self+offset);			/* object file version */
+	offset+=sizeof(uint32_t);
+
+	uint32_t e_entry      = le32(self+offset);			/* entry point address */
+	offset+=sizeof(uint32_t);
+
+	uint32_t e_phoff      = le32(self+offset);			/* program header offset */
+	offset+=sizeof(uint32_t);
+
+	uint32_t e_shoff      = le32(self+offset);			/* section header offset */
+	offset+=sizeof(uint32_t);
+
+	uint16_t e_flags      = le16(self+offset);			/* processor-specific flags */
+	offset+=sizeof(uint16_t);
+
+	uint32_t e_ehsize     = le16(self+offset);			/* ELF header size */
+	offset+=sizeof(uint16_t);
+
+	uint16_t e_phentsize  = le16(self+offset);			/* size of program header entry */
+	offset+=sizeof(uint16_t);
+
+	uint16_t e_phnum      = le16(self+offset);			/* number of program header entries */
+	offset+=sizeof(uint16_t);
+
+	uint16_t e_shentsize  = le16(self+offset);			/* size of section header entry */
+	offset+=sizeof(uint16_t);
+
+	uint16_t e_shnum      = le16(self+offset);			/* number of section header entries */
+	offset+=sizeof(uint16_t);
+
+	uint16_t e_shstrndx   = le16(self+offset);			/* section name string table index */
+	offset+=sizeof(uint16_t);
 
 	printf("--- ELF INFO ---\n");
-	printf("Type                    0x%04x [%s]\n",e_type,(e_type==2) ? "EXEC" : "SPRX");
+
+	printf("File Class              0x%02x [%s]\n",e_ident[4],(e_ident[4]==1) ? "ELFCLASS32" : "ELFCLASS64");
+	printf("File Data               0x%02x [%s]\n",e_ident[5],(e_ident[5]==1) ? "ELFDATA2LSB][LITTLE ENDIAN" : "ELFDATA2MSB][BIG ENDIAN");
+	printf("File Version            0x%02x\n",e_ident[6]);
+
+	printf("Type                    0x%04x [%s]\n",e_type,(e_type==2) ? "EXEC" : "PRX");
 	printf("Machine Type            0x%04x\n",e_machine);
 	printf("Version                 0x%08x\n",e_version);
-	printf("Entry Point Address     0x%08x%08x\n",(u32)e_entry,(u32)(e_entry>>32));
+	printf("Entry Point Address     0x%08x\n",e_entry);
 	printf("Program Header Offset   0x%08x\n",e_phoff);
 	printf("Section Header Offset   0x%08x\n",e_shoff);
 	printf("Flag                    0x%04x\n",e_flags);
@@ -46,15 +181,19 @@ void elf(u32 offset){
 	printf("Number Hdr Entries      0x%04x (%u)\n",e_shnum,e_shnum);
 	printf("Section String Table    0x%04x\n",e_shstrndx);
 
-
 }
 
 void app_info(u32 offset){
-	u64 authid    = le64(self+offset);       /* auth id     */
-	u32 vendor_id = le32(self+offset+0x8);   /* vendor id   */
-	u32 self_type = le32(self+offset+0xC);   /* app type    */
-	u64 version   = le64(self+offset+0x10);  /* app version */
-	u64 padding   = le64(self+offset+0x18);  /* UNKNOWN     */
+	u64 authid    = le64(self+offset);   /* auth id     */
+	offset += sizeof(u64);
+	u32 vendor_id = le32(self+offset);   /* vendor id   */
+	offset += sizeof(u32);
+	u32 self_type = le32(self+offset);   /* app type    */
+	offset += sizeof(u32);
+	u64 version   = le64(self+offset);   /* app version */
+	offset += sizeof(u64);
+	u64 padding   = le64(self+offset);   /* UNKNOWN     */
+	offset += sizeof(u64);
 
 	printf("--- APP INFO ---\n");	
 	printf("Authotiry ID            0x%08x%08x\n",(u32)authid,(u32)(authid>>32));
@@ -66,28 +205,238 @@ void app_info(u32 offset){
 
 }
 
+//64bit
+
+
+void program_hdr64(u64 offset){
+	uint32_t p_type    = le32(self+offset);		/* type of segment           */
+	offset+=sizeof(uint32_t);
+	uint32_t p_flags   = le32(self+offset);		/* segment attributes        */
+	offset+=sizeof(uint32_t);
+	uint32_t p_offset  = le32(self+offset);		/* offset in file            */
+	offset+=sizeof(uint32_t);
+	uint32_t p_vaddr   = le32(self+offset);		/* virtual address in memory */
+	offset+=sizeof(uint32_t);
+	uint32_t p_paddr   = le32(self+offset);		/* reserved                  */
+	offset+=sizeof(uint32_t);
+	uint32_t p_filesz  = le32(self+offset);		/* size of segment in file   */
+	offset+=sizeof(uint32_t);
+	uint32_t p_memsz   = le32(self+offset);		/* size of segment in memory */
+	offset+=sizeof(uint32_t);
+	uint32_t p_align   = le32(self+offset);		/* alignment of segment      */
+	offset+=sizeof(uint32_t);
+
+	const char* p_type_char = prg_type(p_type);
+	const char* p_flags_char = prg_flags(p_flags);
+
+	printf("--- SELF PROGRAM INFO64 ---\n");
+	printf("Type                    0x%08x [%s]\n",p_type,p_type_char);
+	printf("Flags                   0x%08x [%s]\n",p_flags,p_flags_char);
+	printf("Offset                  0x%08x\n",p_offset);
+	printf("Virtual Address         0x%08x\n",p_vaddr);
+	printf("Reserved Adderess       0x%08x\n",p_paddr);
+	printf("Real Size               0x%08x (%u Bytes)\n",p_filesz,p_filesz);
+	printf("Size in Memory          0x%08x (%u Bytes)\n",p_memsz,p_memsz);
+	printf("Alignment               0x%08x (%u)\n",p_align,p_align);
+}
+
+void section_hdr64(u64 offset){
+	uint32_t sh_name      = le32(self+offset);	/* section name */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_type      = le32(self+offset);	/* section type */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_flags     = le32(self+offset);	/* section attributes */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_addr      = le32(self+offset);	/* virtual address in memory */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_offset    = le32(self+offset);	/* offset in file */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_size      = le32(self+offset);	/* size of section */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_link      = le32(self+offset);	/* link to other section */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_info      = le32(self+offset);	/* miscellaneous information */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_addralign = le32(self+offset);	/* address alignment boundary */
+	offset+=sizeof(uint32_t);
+	uint32_t sh_entsize   = le32(self+offset);	/* size of entries, if section has table */
+	offset+=sizeof(uint32_t);
+
+	printf("--- SELF PROGRAM INFO64 ---\n");
+	printf("Name                    0x%08x\n",sh_name);
+	printf("Type                    0x%08x\n",sh_type);
+	printf("Flags                   0x%08x\n",sh_flags);
+	printf("Virtual Address         0x%08x\n",sh_addr);
+	printf("Offset                  0x%08x (%u Bytes)\n",sh_offset,sh_offset);
+	printf("Size                    0x%08x\n",sh_size);
+	printf("Link to other section   0x%08x\n",sh_link);
+	printf("Info                    0x%08x\n",sh_info);
+	printf("Address Alignment       0x%08x\n",sh_addralign);
+	printf("Size Entries            0x%08x (%u Bytes)\n",sh_entsize,sh_entsize);
+}
+
+void elf64(u64 offset){
+	uint8_t e_ident[16];
+	for(int i=0;i<0x10;i++)
+		e_ident[i] = be8(self+offset+i);
+
+	uint16_t e_type       = le16(self+offset+0x10);			/* object file type */
+	offset+=0x10+sizeof(uint16_t);
+
+	uint16_t e_machine    = le16(self+offset);			/* machine type */
+	offset+=sizeof(uint16_t);
+
+	uint32_t e_version    = le32(self+offset);			/* object file version */
+	offset+=sizeof(uint32_t);
+
+	uint32_t e_entry      = le32(self+offset);			/* entry point address */
+	offset+=sizeof(uint32_t);
+
+	uint32_t e_phoff      = le32(self+offset);			/* program header offset */
+	offset+=sizeof(uint32_t);
+
+	uint32_t e_shoff      = le32(self+offset);			/* section header offset */
+	offset+=sizeof(uint32_t);
+
+	uint16_t e_flags      = le16(self+offset);			/* processor-specific flags */
+	offset+=sizeof(uint16_t);
+
+	uint32_t e_ehsize     = le16(self+offset);			/* ELF header size */
+	offset+=sizeof(uint16_t);
+
+	uint16_t e_phentsize  = le16(self+offset);			/* size of program header entry */
+	offset+=sizeof(uint16_t);
+
+	uint16_t e_phnum      = le16(self+offset);			/* number of program header entries */
+	offset+=sizeof(uint16_t);
+
+	uint16_t e_shentsize  = le16(self+offset);			/* size of section header entry */
+	offset+=sizeof(uint16_t);
+
+	uint16_t e_shnum      = le16(self+offset);			/* number of section header entries */
+	offset+=sizeof(uint16_t);
+
+	uint16_t e_shstrndx   = le16(self+offset);			/* section name string table index */
+	offset+=sizeof(uint16_t);
+
+	printf("--- ELF INFO64 ---\n");
+
+	printf("File Class              0x%02x [%s]\n",e_ident[4],(e_ident[4]==1) ? "ELFCLASS32" : "ELFCLASS64");
+	printf("File Data               0x%02x [%s]\n",e_ident[5],(e_ident[5]==1) ? "ELFDATA2LSB][LITTLE ENDIAN" : "ELFDATA2MSB][BIG ENDIAN");
+	printf("File Version            0x%02x\n",e_ident[6]);
+
+	printf("Type                    0x%04x [%s]\n",e_type,(e_type==2) ? "EXEC" : "PRX");
+	printf("Machine Type            0x%04x\n",e_machine);
+	printf("Version                 0x%08x\n",e_version);
+	printf("Entry Point Address     0x%08x\n",e_entry);
+	printf("Program Header Offset   0x%08x\n",e_phoff);
+	printf("Section Header Offset   0x%08x\n",e_shoff);
+	printf("Flag                    0x%04x\n",e_flags);
+	printf("ELF Header Size         0x%08x (%u Bytes)\n",e_ehsize,e_ehsize);
+	printf("Size Progr Hdr Entry    0x%04x (%u Bytes)\n",e_phentsize,e_phentsize);
+	printf("Number Hdr Entries      0x%04x (%u)\n",e_phnum,e_phnum);
+	printf("Size Sect  Hdr Entry    0x%04x (%u Bytes)\n",e_shentsize,e_shentsize);
+	printf("Number Hdr Entries      0x%04x (%u)\n",e_shnum,e_shnum);
+	printf("Section String Table    0x%04x\n",e_shstrndx);
+
+}
+
+void app_info64(u64 offset){
+	u64 authid    = le64(self+offset);   /* auth id     */
+	offset += sizeof(u64);
+	u32 vendor_id = le32(self+offset);   /* vendor id   */
+	offset += sizeof(u32);
+	u32 self_type = le32(self+offset);   /* app type    */
+	offset += sizeof(u32);
+	u64 version   = le64(self+offset);   /* app version */
+	offset += sizeof(u64);
+	u64 padding   = le64(self+offset);   /* UNKNOWN     */
+	offset += sizeof(u64);
+
+	printf("--- APP INFO64 ---\n");	
+	printf("Authotiry ID            0x%08x%08x\n",(u32)authid,(u32)(authid>>32));
+	printf("Vendor ID               0x%08x\n",vendor_id);
+	printf("SELF Type               0x%08x\n",self_type);
+	printf("Version                 0x%08x%08x\n",(u32)version,(u32)(version>>32));
+	printf("Padding                 0x%08x%08x\n",(u32)padding,(u32)(padding>>32));
+	
+
+}
+
+void sce_version64(u64 offset){
+	uint32_t unknown1 = le32(self+offset);
+	offset+=sizeof(uint32_t);
+	uint32_t unknown2 = le32(self+offset);
+	offset+=sizeof(uint32_t);
+	uint32_t unknown3 = le32(self+offset);
+	offset+=sizeof(uint32_t);
+	uint32_t unknown4 = le32(self+offset);
+	offset+=sizeof(uint32_t);
+
+	printf("--- SELF SCE VERSION64 ---\n");
+	printf("Unknown_1               0x%08x\n",unknown1);
+	printf("Unknown_2               0x%08x\n",unknown2);
+	printf("Unknown_3               0x%08x\n",unknown3);
+	printf("Unknown_4               0x%08x\n",unknown4);
+
+}
+
+void control_information64(u64 offset){
+	uint32_t type    = le32(self+offset);    // 4== ; 6==;7==
+	offset+=sizeof(uint32_t);
+	uint32_t size    = le32(self+offset);
+	offset+=sizeof(uint32_t);
+	uint64_t unknown = le64(self+offset); // 0;1
+	offset+=sizeof(uint64_t);
+
+	printf("--- CONTROL INFORMATION64 ---\n");
+	printf("Type                    0x%08x\n",type);
+	printf("Size                    0x%08x\n",size);
+	printf("Unknown                 0x%08x%08x\n",(u32)unknown,(u32)(unknown>>32));
+
+}
+
+
 void readself(){
 	printf("\nReading...\n");
+	u32 offset=0;
+	u32 magic               = be32(self);         /* 53434500 = SCE\0 */
+	offset += sizeof(u32);
+	u32 version             = le32(self+offset);  /* header version 3*/
+	offset += sizeof(u32);
+	u16 sdk_type            = le16(self+offset);  /* SDK type */
+	offset += sizeof(u16);
+	u16 header_type         = le16(self+offset);  /* 1 self, 2 unknown, 3 pkg */
+	offset += sizeof(u16);
+	u32 metadata_offset     = le32(self+offset);  /* metadata offset */
+	offset += sizeof(u32);
+	u64 header_len          = le64(self+offset);  /* self header length */
+	offset += sizeof(u64);
+	u64 elf_filesize        = le64(self+offset);  /* ELF file length */
+	offset += sizeof(u64);
+	u64 self_filesize       = le64(self+offset);  /* SELF file length */
+	offset += sizeof(u64);
+	u64 unknown1            = le64(self+offset);  /* UNKNOWN */
+	offset += sizeof(u64);
+	u64 self_offset         = le64(self+offset);  /* Self Offset */
+	offset += sizeof(u64);
+	u64 appinfo_offset      = le64(self+offset);  /* app info offset */
+	offset += sizeof(u64);
+	u64 elf_offset          = le64(self+offset);  /* ELF #1 offset */
+	offset += sizeof(u64);
+	u64 phdr_offset         = le64(self+offset);  /* program header offset */
+	offset += sizeof(u64);
+	u64 shdr_offset         = le64(self+offset);  /* section header offset */
+	offset += sizeof(u64);
+	u64 section_info_offset = le64(self+offset);  /* section info offset */
+	offset += sizeof(u64);
+	u64 sceversion_offset   = le64(self+offset);  /* version offset */
+	offset += sizeof(u64);
+	u64 controlinfo_offset  = le64(self+offset);  /* control info offset */
+	offset += sizeof(u64);
+	u64 controlinfo_size    = le64(self+offset);  /* control info size */
+	offset += sizeof(u64);
 
-	u32 magic               = be32(self);       /* 53434500 = SCE\0 */
-	u32 version             = le32(self+0x4 );  /* header version 3*/
-	u16 sdk_type            = le16(self+0x8 );  /* */
-	u16 header_type         = le16(self+0xA );  /* 1 self, 2 unknown, 3 pkg */
-	u32 metadata_offset     = le32(self+0xC );  /* metadata offset */
-	u64 header_len          = le64(self+0x10);  /* self header length */
-	u64 elf_filesize        = le64(self+0x18);  /* ELF file length */
-	u64 self_filesize       = le64(self+0x20);  /* SELF file length */
-	u64 unknown1            = le64(self+0x28);  /* UNKNOWN */
-	u64 unknown2            = le64(self+0x30);  /* value is 4 */
-	u32 appinfo_offset      = le32(self+0x38);  /* app info offset */
-	u32 elf_offset          = le32(self+0x40);  /* ELF #1 offset */
-	u32 phdr_offset         = le32(self+0x48);  /* program header offset */
-	u32 shdr_offset         = le32(self+0x50);  /* section header offset */
-	u32 section_info_offset = le32(self+0x58);  /* section info offset */
-	u32 sceversion_offset   = le32(self+0x60);  /* version offset */
-	u32 controlinfo_offset  = le32(self+0x68);  /* control info offset */
-	u64 controlinfo_size    = le64(self+0x70);  /* control info size */
-	u64 padding             = le64(self+0x78);
 
 	if(magic!=HDR)
 		fail("\nERROR! Not a PlayStation Vita Self File (Magic: %08x)",magic);
@@ -112,23 +461,50 @@ void readself(){
 	printf("SDK Type                0x%08x\n",sdk_type);
 	printf("Header Type             0x%08x\n",header_type);
 	printf("Metadata offset         0x%08x\n",metadata_offset);
-	printf("Header Length           0x%08x%08x (%u Bytes)\n",(u32)(header_len),(u32)(header_len>>32),(u32)(header_len>>32));
-	printf("Elf Size                0x%08x%08x (%u Bytes)\n",(u32)elf_filesize,(u32)(elf_filesize>>32),(u32)(elf_filesize>>32));
-	printf("Self Size               0x%08x%08x (%u Bytes)\n",(u32)self_filesize,(u32)(self_filesize>>32),(u32)(self_filesize>>32));
+	printf("Header Length           0x%08x%08x (%u%04u Bytes)\n",(u32)(header_len),(u32)(header_len>>32),(u32)(header_len),(u32)(header_len>>32));
+	printf("Elf Size                0x%08x%08x (%u%04u Bytes)\n",(u32)elf_filesize,(u32)(elf_filesize>>32),(u32)elf_filesize,(u32)(elf_filesize>>32));
+	printf("Self Size               0x%08x%08x (%u%04u Bytes)\n",(u32)self_filesize,(u32)(self_filesize>>32),(u32)self_filesize,(u32)(self_filesize>>32));
 	printf("Unknown_1               0x%08x%08x\n",(u32)unknown1,(u32)(unknown1>>32));
-	printf("Unknown_2               0x%08x%08x\n",(u32)unknown2,(u32)(unknown2>>32));
-	printf("Application Info Offset 0x%08x\n",appinfo_offset);
-	printf("Elf Offset              0x%08x\n",elf_offset);
-	printf("Program hdr  Offset     0x%08x\n",phdr_offset);
-	printf("Section hdr  Offset     0x%08x\n",shdr_offset);
-	printf("Section Info Offset     0x%08x\n",section_info_offset);
-	printf("Version Offset          0x%08x\n",sceversion_offset);
-	printf("Control Info Offset     0x%08x\n",controlinfo_offset);
-	printf("Control Info Size       0x%08x%08x (%u Bytes)\n",(u32)controlinfo_size,(u32)(controlinfo_size>>32),(u32)(controlinfo_size>>32));
-	printf("Padding                 0x%08x%08x\n",(u32)padding,(u32)(padding>>32));
+	printf("Self Offset             0x%08x%08x\n",(u32)self_offset,(u32)(self_offset>>32));
+	printf("Application Info Offset 0x%08x%08x\n",(u32)appinfo_offset,(u32)(appinfo_offset>>32));
+	printf("Elf Offset              0x%08x%08x\n",(u32)elf_offset,(u32)(elf_offset>>32));
+	printf("Program hdr  Offset     0x%08x%08x\n",(u32)phdr_offset,(u32)(phdr_offset>>32));
+	printf("Section hdr  Offset     0x%08x%08x\n",(u32)shdr_offset,(u32)(shdr_offset>>32));
+	printf("Section Info Offset     0x%08x%08x\n",(u32)section_info_offset,(u32)(section_info_offset>>32));
+	printf("Version Offset          0x%08x%08x\n",(u32)sceversion_offset,(u32)(sceversion_offset>>32));
+	printf("Control Info Offset     0x%08x%08x\n",(u32)controlinfo_offset,(u32)(controlinfo_offset>>32));
+	printf("Control Info Size       0x%08x%08x (%u%04u Bytes)\n",(u32)controlinfo_size,(u32)(controlinfo_size>>32)
+								    ,(u32)controlinfo_size,(u32)(controlinfo_size>>32));
 	
-	app_info(appinfo_offset);
-	elf(elf_offset);
+	if(((u32)appinfo_offset)!=0)
+		app_info64(appinfo_offset);
+	else
+		app_info((u32)(appinfo_offset>>32));
+
+	if(((u32)(elf_offset))!=0)
+		elf64(elf_offset);
+	else
+		elf(((u32)(elf_offset>>32)));
+
+	if(((u32)phdr_offset)!=0)
+		program_hdr64(phdr_offset);
+	else if((phdr_offset>>32)!=0)
+		program_hdr((u32)(phdr_offset>>32));
+
+	if(((u32)shdr_offset)!=0)
+		section_hdr64(shdr_offset);
+	else if((shdr_offset>>32)!=0)
+		section_hdr(((u32)(shdr_offset>>32)));
+
+	if(((u32)sceversion_offset)!=0)
+		sce_version64(sceversion_offset);
+	else
+		sce_version(((u32)(sceversion_offset>>32)));
+
+	if(((u32)controlinfo_offset)!=0)
+		control_information64(controlinfo_offset);
+	else
+		control_information(((u32)(controlinfo_offset>>32)));
 
 	printf("\nDone\n");
 }

@@ -1,4 +1,4 @@
-TOOLS	=	pkg_reader pupunpack readself
+TOOLS	=	pkg_reader spkg_reader pupunpack readself
 COMMON	=	tools.o aes.o sha1.o ec.o bn.o sfo_stuff.o
 DEPS	=	Makefile tools.h types.h
 OSNAME  =	$(shell uname -s)
@@ -8,7 +8,7 @@ COMMON  += mingw_mmap.o
 endif
 
 CC	=  gcc
-CFLAGS	=  -g -O2 -Wall -W
+CFLAGS	=  -g -O2 -Wall -W -std=c99
 LDLIBS  =  -lz
 
 # Darwin's MacPorts Default Path
