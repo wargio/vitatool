@@ -47,7 +47,7 @@ void readSPKG(){
 
 	printf("CreationTime 0x%08x%08x\n",(u32)time,(u32)(time>>32));
 	printf("Header  Size 0x%08x (%u Bytes)\n",(u32)hdr_size,(u32)hdr_size);
-	printf("Content Size 0x%08x%08x (%u%u Bytes)\n",(u32)size,(u32)(size>>32),(u32)size,(u32)(size>>32));
+	printf("Content Size 0x%08x%08x (%u%u Bytes)\n",(u32)content_size,(u32)(content_size>>32),(u32)content_size,(u32)(content_size>>32));
 	printf("Package Size 0x%08x%08x (%u%u Bytes)\n",(u32)size,(u32)(size>>32),(u32)size,(u32)(size>>32));
 
 }
