@@ -119,7 +119,8 @@ void section_hdr(u32 offset){
 
 void elf(u32 offset){
 	uint8_t e_ident[16];
-	for(int i=0;i<0x10;i++)
+	int i=0;
+	for(i=0;i<0x10;i++)
 		e_ident[i] = be8(self+offset+i);
 
 	uint16_t e_type       = le16(self+offset+0x10);			/* object file type */
@@ -277,7 +278,8 @@ void section_hdr64(u64 offset){
 
 void elf64(u64 offset){
 	uint8_t e_ident[16];
-	for(int i=0;i<0x10;i++)
+	int i=0;
+	for(i=0;i<0x10;i++)
 		e_ident[i] = be8(self+offset+i);
 
 	uint16_t e_type       = le16(self+offset+0x10);			/* object file type */

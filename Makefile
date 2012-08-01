@@ -8,7 +8,7 @@ COMMON  += mingw_mmap.o
 endif
 
 CC	=  gcc
-CFLAGS	=  -g -O2 -Wall -W -std=c99
+CFLAGS	=  -g -O2 -Wall -W
 LDLIBS  =  -lz
 
 # Darwin's MacPorts Default Path
