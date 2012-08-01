@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 
 	int beta=0;
 
-	if (argc != 2 && argc != 3 && argc != 4)
+	if (argc != 2 && argc != 3)
 		fail("usage: ungpkg filename.pkg\n"
 		     " This is just for PS Vita Game Packages. not PS Vita System Packages.\n"
 		     "	-b  | use beta key instead of the retail one");
