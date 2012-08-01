@@ -428,7 +428,7 @@ static int key_build_path(char *ptr)
 
 	memset(ptr, 0, 256);
 
-	dir = getenv("PS3_KEYS");
+	dir = getenv("VITA_KEYS");
 	if (dir != NULL) {
 		strncpy(ptr, dir, 256);
 		return 0;
@@ -440,12 +440,12 @@ static int key_build_path(char *ptr)
 	home = getenv("HOME");
 #endif
 	if (home == NULL) {
-          snprintf (ptr, 256, "ps3keys");
+          snprintf (ptr, 256, "vitakeys");
         } else {
 #ifdef WIN32
-          snprintf(ptr, 256, "%s\\ps3keys\\", home);
+          snprintf(ptr, 256, "%s\\vitakeys\\", home);
 #else
-          snprintf(ptr, 256, "%s/.ps3/", home);
+          snprintf(ptr, 256, "%s/.vita/", home);
 #endif
         }
 

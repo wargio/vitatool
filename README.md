@@ -32,3 +32,8 @@ CHANGELOG
 	    *Updated pupunpack. corrected some ID stuff (a self 0x200 is sprx, same for 0x204. it is a self).
 	*1.05b
 	    *Updated readself. again more infos about selfs.
+	*1.06
+	    *Added ungpkg to allow to unpack game packages.
+	    *Fixed tools.c to allow to search ps vita keys in the right folder.
+	    *Removed pkg_reader. useless
+
