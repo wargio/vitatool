@@ -1,4 +1,4 @@
-TOOLS	=	pkg_reader spkg_reader pupunpack readself
+TOOLS	=	ungpkg spkg_reader pupunpack readself
 COMMON	=	tools.o aes.o sha1.o ec.o bn.o sfo_stuff.o
 DEPS	=	Makefile tools.h types.h
 OSNAME  =	$(shell uname -s)
