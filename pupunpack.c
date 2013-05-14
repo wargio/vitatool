@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <dirent.h>
 #include <sys/stat.h>
 #include "tools.h"
 #include "types.h"
@@ -21,15 +22,17 @@
 static u8 *pup = NULL;
 static u32 file_count;
 
-const uint64_t PSV_HDR = 0x5343455546000001;
+const  u64 PSV_HDR = 0x5343455546000001ull;
 
-static int read_only = 0;
+static int  read_only = 0;
+static int  unknown_type = 0;
+static char unknown_name[256];
 
 static struct id2name_tbl t_names[] = {
 	{0x100, "version.txt"},
 	{0x101, "license.xml"},
-	{0x200, "psp2swu.sprx"},
-	{0x204, "psp2swu.self"},
+	{0x200, "psp2swu.self"},
+	{0x204, "psp2swu.sprx"},
 	{0x301, "package_data01.pkg"},
 	{0x302, "package_data02.pkg"},
 	{0x303, "package_data03.pkg"},
@@ -50,6 +53,19 @@ static struct id2name_tbl t_names[] = {
 	{0x312, "package_data18.pkg"},
 	{0x313, "package_data19.pkg"},
 	{0x314, "package_data20.pkg"},
+	{0x315, "package_data20.pkg"},
+	{0x316, "package_data20.pkg"},
+	{0x317, "package_data20.pkg"},
+	{0x318, "package_data20.pkg"},
+	{0x319, "package_data20.pkg"},
+	{0x31a, "package_data20.pkg"},
+	{0x326, "debug_data00.pkg"},
+	{0x327, "debug_data01.pkg"},
+	{0x328, "debug_data02.pkg"},
+	{0x329, "debug_data03.pkg"},
+	{0x32a, "debug_data04.pkg"},
+	{0x32b, "debug_data05.pkg"},
+	{0x32c, "debug_data06.pkg"},
 	{0x400, "package_scewm.wm"},
 	{0x401, "package_sceas.as"},
 	{0, NULL}
@@ -70,15 +86,14 @@ void Unpup(const char* folder){
 	u32 i;
 	char folder_2[200];
 	if(read_only!=1){
-		for(i=0;;i++){
-			sprintf(folder_2,"%s_%u",folder,i);
-			MKDIR(folder_2, 0777);
-			if (chdir(folder_2) != 0){
-				
-			}else{
-				break;
-			}
-		}
+		DIR  *dip;
+		i=0;
+		do{
+			sprintf(folder_2,"%s_%u",folder,i++);
+		}while((dip = opendir(folder_2)) != NULL);
+		closedir(dip);
+		MKDIR(folder_2, 0777);
+		chdir(folder_2);
 	}
 
 	const char *file_name;
@@ -110,10 +125,12 @@ void Unpup(const char* folder){
 		size   = le32(pup+0x80+0x20*i+0x10);
 
 		file_name = id2name(entry, t_names, NULL);
-		if(file_name==NULL)
-			fail("unknown entry id: 0x%08x | Offset: 0x%08x ",entry,offset);
-	//	dmsg("Offset: %08x  ",offset);
-		printf("Found: %20s | size: %10u Bytes\n",file_name,size);
+		if(file_name==NULL){
+			dmsg("unknown entry id: 0x%08x | Offset: 0x%08x\n",entry,offset);
+			snprintf(unknown_name,256,"unknown_data_0x%x_%02d.data",entry,unknown_type++);
+			file_name = unknown_name;
+		}
+		printf("Found: %30s | size: %10u Bytes\n",file_name,size);
 		if(read_only!=1)
 			memcpy_to_file(file_name, pup + offset, size);
 	}

@@ -37,8 +37,8 @@ static inline u64 le64(u8 *p)
 {
 	u32 a, b;
 
-	a = le32(p);
-	b = le32(p + 4);
+	a = le32(p + 4);
+	b = le32(p);
 
 	return ((u64)a<<32) | b;
 }

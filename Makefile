@@ -1,6 +1,6 @@
 TOOLS	=	ungpkg spkg_reader pupunpack readself
 COMMON	=	tools.o aes.o sha1.o ec.o bn.o sfo_stuff.o
-DEPS	=	Makefile tools.h types.h
+DEPS	=	Makefile tools.h types.h little_endian.h
 OSNAME  =	$(shell uname -s)
 
 ifeq ($(findstring MINGW, $(OSNAME)), MINGW)
@@ -28,5 +28,5 @@ $(OBJS): %.o: %.c $(DEPS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	-rm -f $(OBJS) $(TOOLS) *.exe
+	-rm -f $(OBJS) $(TOOLS) *.exe *~
 
